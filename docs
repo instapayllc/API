@@ -1,0 +1,121 @@
+Request URL: Https://Octapay.Fund/Api/Transaction
+
+Request Type: POST
+
+API Call Example
+
+// You can call our API following curl post example
+$url = "https://octapay.fund/api/transaction";
+$key = "Your API Key";
+// Fill with real customer info
+$data = [
+    'api_key' => $key,
+    'first_name' => 'First Name',
+    'last_name' => 'Last Name',
+    'address' => 'Address',
+    'sulte_apt_no' => 'Sulte Apt No.',
+    'country' => 'US',
+    'state' => 'NY', // if your country US then use only 2 letter state code.
+    'city' => 'New York',
+    'zip' => '38564',
+    'ip_address' => '192.168.168.4',
+    'birth_date' => '06/12/1990',
+    'email' => 'test@gmail.com',
+    'phone_no' => '+91999999999',
+    'card_type' => '2', // See your card type in list
+    'amount' => '10.00',
+    'currency' => 'USD',
+    'card_no' => '4242424242424242',
+    'ccExpiryMonth' => '02',
+    'ccExpiryYear' => '2020',
+    'cvvNumber' => '123',
+    'response_url' => 'https://yourdomain.com/callback.php',
+];
+
+$curl = curl_init();
+curl_setopt($curl, CURLOPT_URL, $url);
+curl_setopt($curl, CURLOPT_POST, 1);
+curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($curl, CURLOPT_HTTPHEADER,[
+    'Content-Type: application/json'
+]);
+$response = curl_exec($curl);
+curl_close($curl);
+
+$responseData = json_decode($response);
+
+print_r($responseData);
+                            
+
+Response
+After Successful CURL Request, Response Will Be Sent In JSON Format.
+
+Validation Errors
+If There Will Be Validation Errors In Request, Response Will Be Like:
+
+
+{
+    "status": "fail",
+    "errors": {
+        "first_name": [
+            "The first name field is required."
+        ]
+        .......
+        // Other validation error
+    }
+}
+                            
+MAINLY THERE ARE 3 TYPES OF RESPONSE WITH BELLOW PARAMETER:
+“status”:"fail” : Transaction is declined.
+“status”:"success” : Transaction is success.
+“status”:"3d_redirect” : 3D secure redirection is required to complete the transaction
+
+Success Or Decline
+If Response Contains “Status”:"Fail” Or “Status”:"Success” It Means Transaction Is Complete And It Doesn’t Need To Redirect To 3DS URL.
+
+This Is Successful Transaction Response
+
+{
+    "status": "success",
+    "message": "Your Transaction was processed successfully!!",
+    "order_id" : "Unique order no."
+}
+            				
+This Is Declined Transaction Response
+
+{
+    "status": "failed",
+    "message": "Card provided has expired",
+    "order_id" : "Unique order no."
+}
+            				
+
+3D Secure Redirect
+If The Response Returns “Status”:"3d_redirect” Need To Redirect The “Redirect_3ds_url”
+
+3D Secure Json Response Type :
+
+{
+    "status": "3d_redirect",
+    “redirect_3ds_url”: "https://octapay.fund/redirect?hash=gVRC9OjvYehEbiTAS7RXoxC7L1566046455”,
+    "api_key": "sugQdpk3gwNi9x63MRAFLgkMJ4nyil88ZYMyjqTSE3FIo8Lghfi",
+    "sulte_apt_no": null
+}        
+            				
+
+Response After 3DS Response
+After 3D Secure Complete, User Will Be Redirect To Merchant Website.
+
+If Transaction Will Be Success, User Will Redirect To ”Response_url” With Response In Query String As Bellow:
+
+Https://Octapay.Fund/Response?Status=Success&Message=Your%20transaction%20was%20success&Order_id=20190000458521&Sulte_apt_no=456789521365
+
+If The Transaction Will Fail, User Will Redirect To “Response_url” With Response In Query String As Bellow:
+
+Https://Octapay.Fund/Response?Status=Fail&Message=Activity%20limit%20exceeded.&Order_id=20190000458521&Sulte_apt_no=456789521365
+
+NOTE:
+After Successful Redirect Back, Create New CURL Request And Get Transaction Status:
+
+Https://Octapay.Fund/Tutorials/Octapay-Get-Transaction-Details-Api
